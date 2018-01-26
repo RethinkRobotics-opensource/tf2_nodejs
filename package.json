@@ -2,21 +2,25 @@
   "name": "tf2_nodejs",
   "version": "0.1.0",
   "description": "Native ROS transform library (tf2) for nodejs",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "keywords": [
     "ros", "tf2", "tf", "transform"
   ],
   "scripts": {
+    "test": "mocha --recursive test"
   },
-  "author": " ",
+  "author": "chris smith",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/RethinkRobotics-opensource/tf2_nodejs"
   },
   "devDependencies": {
+    "mocha": "^3.4.2",
+    "chai": "^4.0.2",
   },
   "dependencies": {
-    "rosnodejs": "2.1.0"
+    "rosnodejs": "2.1.0",
+    "three": "0.89.0"
   }
 }

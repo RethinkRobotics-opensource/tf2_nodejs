@@ -15,10 +15,23 @@
  *    limitations under the License.
  */
 
-"use strict";
+const Transform = require('./geometry/Transform.js');
+const Frame = require('./geometry/Frame.js');
 
-const TransformListener = require('./TransformListener');
+class StaticFrame extends Frame {
+  constructor(id, options={}) {
+    super(id, options);
 
-module.exports = {
-  TransformListener
-};
+    this.transform = options.transform || new Transform();
+  }
+
+  addTransform(tf) {
+    this.transform = tf.transform;
+  }
+
+  getTransform(time) {
+    return this.transform;
+  }
+}
+
+module.exports = StaticFrame;

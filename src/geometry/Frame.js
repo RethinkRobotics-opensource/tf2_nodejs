@@ -15,10 +15,16 @@
  *    limitations under the License.
  */
 
-"use strict";
+class Frame {
+  constructor(id, options={}) {
+    this.id = id;
 
-const TransformListener = require('./TransformListener');
+    this.parent = options.parent || null;
 
-module.exports = {
-  TransformListener
-};
+    this.children = options.children || new Set();
+
+    this.time = options.time || {secs: 0, nsecs: 0};
+  }
+}
+
+module.exports = Frame;

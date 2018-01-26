@@ -15,10 +15,23 @@
  *    limitations under the License.
  */
 
-"use strict";
+const TransformCache = require('./TransformCache.js');
+const Frame = require('./geometry/Frame.js');
 
-const TransformListener = require('./TransformListener');
+class DynamicFrame extends Frame {
+  constructor(id, options={}) {
+    super(id, options);
 
-module.exports = {
-  TransformListener
-};
+    this.transform = new TransformCache(options.maxAgeS);
+  }
+
+  addTransform(tf) {
+    this.transform.insert(tf);
+  }
+
+  getTransform(time) {
+    return this.transform.getClosest(time);
+  }
+}
+
+module.exports = DynamicFrame;
