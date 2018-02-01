@@ -28,6 +28,14 @@ function cleanId(frameId) {
   return frameId;
 }
 
+/**
+ * @class TFTree
+ *
+ * Equivalent to BufferCore in OSRF's tf2 - stores data for every transforms in the tree
+ * Can store time-limited cache of data or static data per-frame.
+ * Allows users to look up transform between any two frames in the tree at arbitrary times, assuming
+ * time is within the buffer
+ */
 class TFTree {
   constructor(maxAgeS = 10) {
     this._maxAgeS = maxAgeS;
@@ -107,7 +115,7 @@ class TFTree {
     }
   }
 
-  getFrame(frameId) {
+  _getFrame(frameId) {
     return this._frames[cleanId(frameId)];
   }
 
@@ -125,12 +133,12 @@ class TFTree {
   }
 
   hasFrame(frameId) {
-    return !!this.getFrame(frameId);
+    return !!this._getFrame(frameId);
   }
 
-  getChain(fromId, toId) {
-    const from = this.getFrame(fromId);
-    const to = this.getFrame(toId);
+  _getChain(fromId, toId) {
+    const from = this._getFrame(fromId);
+    const to = this._getFrame(toId);
     if (from && to) {
       const chain = new TfChain(from, to);
       if (chain._valid) {
@@ -141,13 +149,47 @@ class TFTree {
     return null;
   }
 
-  getTransform(fromId, toId, stamp) {
-    const chain = this.getChain(fromId, toId);
+  _getTransform(fromId, toId, stamp) {
+    const chain = this._getChain(fromId, toId);
     if (chain) {
       return chain.getTransform(stamp);
     }
     // else
     return null;
+  }
+
+  canTransform(targetFrame, sourceFrame, stamp) {
+    return !!this._getTransform(targetFrame, sourceFrame, stamp);
+  }
+
+  waitForTransform(targetFrame, sourceFrame, stamp, timeoutMs, sleepDurationMs=20) {
+    return new Promise((resolve, reject) => {
+      this._waitForTransform(targetFrame, sourceFrame, stamp, timeoutMs, sleepDurationMs, resolve, reject);
+    });
+  }
+
+  lookupTransform(targetFrame, sourceFrame, stamp) {
+    return this._getTransform(targetFrame, sourceFrame, stamp);
+  }
+
+  // TODO: implement transformDATA methods
+  // http://wiki.ros.org/tf/Overview/Using%20Published%20Transforms#transformDATA_Methods
+
+
+  //--------------------------------------------------------------------------------------------------
+
+  _waitForTransform(targetFrame, sourceFrame, stamp, timeoutMs, sleepDurationMs, resolve, reject, startTime = Date.now()) {
+    if (this.canTransform(targetFrame, sourceFrame, stamp)) {
+      resolve(true);
+    }
+    else if (Date.now() - startTime < timeoutMs) {
+      setTimeout(() => {
+        this._waitForTransform(targetFrame, sourceFrame, stamp, timeoutMs, sleepDurationMs, resolve, reject, startTime);
+      }, sleepDurationMs);
+    }
+    else {
+      reject(new Error('Timeout'));
+    }
   }
 }
 
