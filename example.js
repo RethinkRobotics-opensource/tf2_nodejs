@@ -16,15 +16,19 @@
  */
 
 const rosnodejs = require('rosnodejs');
-const TransformListener = require('./src/TransformListener.js');
+const tf2Nodejs = require('./src/index.js');
 const readline = require('readline');
-const timeUtils = require('./src/TimeUtils.js');
 
 rosnodejs.initNode('/tfListener', { anonymous: true })
 .then(() => {
-  const nh = rosnodejs.nh;
 
-  let listener = new TransformListener(nh, 10);
+  tf2Nodejs.configure({
+    ros: rosnodejs
+  });
+
+  const buffer = new tf2Nodejs.Buffer(10);
+  const listener = new tf2Nodejs.TransformListener(buffer);
+  listener.init();
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -38,7 +42,7 @@ rosnodejs.initNode('/tfListener', { anonymous: true })
         // const now = rosnodejs.Time.now();
         // now.secs -= 1;
         const now = {secs: 0, nsecs: 0};
-        const tf = listener.lookupTransform(frames[0], frames[1], now);
+        const tf = buffer.lookupTransform(frames[0], frames[1], now);
         console.log('%j', tf);
       }
 
