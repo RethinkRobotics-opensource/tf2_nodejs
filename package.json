@@ -18,9 +18,9 @@
   "devDependencies": {
     "mocha": "^3.4.2",
     "chai": "^4.0.2",
+    "rosnodejs": "2.1.0"
   },
   "dependencies": {
-    "rosnodejs": "2.1.0",
     "three": "0.89.0"
   }
 }
