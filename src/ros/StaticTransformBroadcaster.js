@@ -15,39 +15,24 @@
  *    limitations under the License.
  */
 
-const TransformListenerInterface = require('../interfaces/TransformListenerInterface.js');
+const StaticTransformBroadcasterInterface = require('../interfaces/StaticTransformBroadcasterInterface.js');
 
 let rosnodejs = null;
 
-class TransformListener extends TransformListenerInterface {
-  constructor(buffer, useStatic = true) {
-    super(buffer);
-
-    this._useStatic = useStatic;
-  }
-
-  init() {
-    const buffer = this._buffer;
+class StaticTransformBroadcaster extends StaticTransformBroadcasterInterface {
+  constructor() {
+    super();
 
     const nodeHandle = rosnodejs.nh;
-    this._tfSub = nodeHandle.subscribe('/tf', 'tf2_msgs/TFMessage', function(msg) {
-      buffer.handleTFMessage(msg);
-    });
-
-    if (this._useStatic) {
-      this._tfStaticSub = nodeHandle.subscribe('/tf_static', 'tf2_msgs/TFMessage', function(msg) {
-        buffer.handleTFMessage(msg, true);
-      });
-    }
+    this._tfPub = nodeHandle.advertise('/tf_static', 'tf2_msgs/TFMessage', { queueSize: 100, latching: true });
   }
 
-  shutdown() {
-    super.shutdown();
+  _publish() {
+    this._tfPub.publish(this._netMessage);
+  }
 
-    return Promise.all([
-      this._tfSub.shutdown(),
-      this._tfStaticSub.shutdown()
-    ]);
+  _shutdown() {
+    return this._tfPub.shutdown();
   }
 }
 
@@ -57,9 +42,9 @@ module.exports = function(ros, ...rest) {
   }
 
   if (new.target) {
-    return new TransformListener(...rest);
+    return new StaticTransformBroadcaster(...rest);
   }
   else {
-    return TransformListener;
+    return StaticTransformBroadcaster;
   }
 };

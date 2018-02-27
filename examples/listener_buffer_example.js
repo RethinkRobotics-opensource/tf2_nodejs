@@ -16,8 +16,11 @@
  */
 
 const rosnodejs = require('rosnodejs');
-const tf2Nodejs = require('./src/index.js');
+const tf2Nodejs = require('../src/index.js');
 const readline = require('readline');
+
+// NOTE: rosnodejs is not a direct dependency of tf2_nodejs - if you're running the examples, make sure
+// rosnodejs can be found by tf2_nodejs in your workspace
 
 rosnodejs.initNode('/tfListener', { anonymous: true })
 .then(() => {

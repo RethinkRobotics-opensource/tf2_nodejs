@@ -19,6 +19,8 @@
 
 const ROS_INTERFACES = {
   TransformListener: require('./ros/TransformListener'),
+  StaticTransformBroadcaster: require('./ros/StaticTransformBroadcaster'),
+  TransformBroadcaster: require('./ros/TransformBroadcaster'),
 };
 
 let configuration = null;
